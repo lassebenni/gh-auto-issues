@@ -5,25 +5,20 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-  issues: write
-
 jobs:
-  failure-test:
+  copilot-create-issue:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fail
-        run: |
-          exit 1
+      - name: Run command
+        run: non-existing-script.sh
 
       - name: Print success
         run: echo "Success!"
 
   on-failure:
     if: failure()
-    needs: failure-test
+    needs: copilot-create-issue
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -38,7 +33,7 @@ jobs:
           # Create issue body with failure details
           echo "@github-copilot start agent task" > issue_body.txt
           echo "" >> issue_body.txt
-          echo "The Failure test [run failed](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) on commit \`${{ github.sha }}\`." >> issue_body.txt
+          echo "The workflow [run failed](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) on commit \`${{ github.sha }}\`." >> issue_body.txt
           echo "" >> issue_body.txt
           echo "Please investigate the Failure." >> issue_body.txt
           echo "" >> issue_body.txt
@@ -76,7 +71,7 @@ jobs:
             -f query='query($owner:String!, $name:String!){ repository(owner:$owner, name:$name){ id } }' \
             --jq '.data.repository.id')
 
-          TITLE="Failure test failed: ${{ github.sha }}"
+          TITLE="Workflow failed: ${{ github.sha }}"
           BODY="$(cat issue_body.txt)"
 
           # 2) Create the issue with Copilot assigned
