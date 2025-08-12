@@ -2,18 +2,18 @@
 
 ![Copilot assigned actions](assets/copilot_auto_assign_issues.gif)
 
-**TLDR:** Set up a GitHub Actions workflow that automatically creates issues when builds fail and assigns them to GitHub Copilot for AI-powered fixes. I'll show you exactly how to do it.
+**TLDR:** Set up a GitHub Actions workflow that automatically creates issues when builds fail and assigns them to GitHub Copilot for AI-powered fixes. This way, you can focus on higher-level tasks while Copilot handles the debugging.
 
-**Assumption:** It's Monday morning and you just had your coffee. You are looking at your nightly Github Actions workflow which failed for some reason. Probably because it's Monday. Now you're manually creating GitHub issues to track the failures, going through the errors in the logs and trying to figure out what's wrong. Just another delightful task to start the day. Sound familiar?
+**Assumption:** It's Monday morning. Your GitHub Actions workflow failed overnight, and now you're faced with manually creating issues, parsing error logs, and tracking down the root cause. Sound familiar?
 
 There's a better way. You can automate the entire process: when your GitHub Actions fail, automatically create an issue and let Copilot fix it for you. In the best case, it immediately suggests the correct fix. In many cases, it will give you a starting point for the fix which you can iterate on. No more manual issue creation, no more forgotten build failures.
 
 ## Why This Actually Matters
-**Before:** CI fails → You manually create an issue → It sits there → Someone eventually looks at it and reads the workflow logs for the failure → Replicates the issue locally → Fixes the issue
+**Before:** CI fails → You manually create an issue → It sits in your backlog → Someone eventually reads the workflow logs → Replicates the issue locally → Debugs and fixes
 
-**After:** CI fails → Issue created automatically → Copilot suggests a fix based on the logs → Actual fix or starting point for fix
+**After:** CI fails → Issue created automatically with context → Copilot analyzes the failure → Suggests a fix or starting point → Quick review and merge
 
-The difference? Your build failures get addressed immediately when they occur, saving you precious debug time.
+The difference? Your build failures get addressed automatically when they occur, saving you precious debugging time.
 
 Here's how to set it up.
 
@@ -24,11 +24,11 @@ Here's how to set it up.
 - Enable GitHub Copilot in your account. This allows Microsoft's AI to work on issues and create pull requests automatically.
 - A GitHub Actions workflow. You can copy the code from [.github/workflows/copilot-create-issue.yml](.github/workflows/copilot-create-issue.yml)
 
-## Prerequisites: Enable GitHub Copilot
-
-![Enable coding agent](assets/enable_coding_agent.gif)
+## Setup Steps
 
 Before we can assign issues to Copilot, you need to make sure GitHub Copilot is properly enabled and configured for your repository.
+
+![Enable coding agent](assets/enable_coding_agent.gif)
 
 ## Step 1: Enable GitHub Copilot
 
@@ -84,16 +84,26 @@ Create a secret named `COPILOT_ASSIGN_PAT` and paste the Personal Access Token y
 
 Create the GitHub Actions workflow file at `.github/workflows/copilot-create-issue.yml`. The workflow uses the `COPILOT_ASSIGN_PAT` secret (which contains the PAT token we created in Step 4) to authenticate with GitHub's GraphQL API. 
 
-**Technical Note:** The workflow specifically uses GraphQL because the GitHub REST API doesn't yet support creating issues assigned to the Copilot agent. The GraphQL implementation in the workflow:
+**Technical Note:** The workflow specifically uses GraphQL because the GitHub REST API doesn't yet support creating issues assigned to the Copilot agent. The GraphQL implementation:
 1. Queries for the Copilot bot ID using the repository's `suggestedActors` 
 2. Creates the issue with the Copilot agent pre-assigned using the `createIssue` mutation
 3. Uses your PAT token for authentication to perform these operations
 
 You can copy the complete workflow code from [the repository](.github/workflows/copilot-create-issue.yml).
 
-## Step 7: Watch the Magic Happen
+## Step 7: Test Your Setup
 
-Once your PAT is configured, the automation kicks in. Here's what happens when your build fails:
+Before waiting for a real failure, test your workflow by intentionally triggering a failure:
+
+1. Modify your workflow to include a step that will fail (like `run: exit 1`)
+2. Push to your repository 
+3. Watch the workflow fail and automatically create an issue
+4. Verify the issue is assigned to `@github-copilot`
+5. Remove the test failure and push again
+
+## Step 8: How the Automation Works
+
+Once your setup is complete, here's what happens when your build fails:
 
 ![Failed Workflow](assets/step_10_failed_workflow.png)
 
@@ -115,9 +125,9 @@ A new GitHub issue is automatically created with:
 
 The issue appears in your Issues tab, ready for action.
 
-## Step 8: Let Copilot Fix It
+## Step 9: Copilot Takes Action
 
-Now comes the fun part. Instead of manually debugging, you assign the issue to GitHub Copilot:
+Since the issue was automatically assigned to Copilot in the previous step, the AI immediately begins analyzing the failure:
 
 ![PR Created](assets/step_14_pr_created.png)
 
@@ -135,7 +145,7 @@ You can chat with Copilot about the issue to understand the problem better.
 
 Copilot proposes specific code changes to resolve the workflow failure.
 
-## Step 9: Review and Merge
+## Step 10: Review and Merge
 
 The rest follows standard GitHub flow:
 
