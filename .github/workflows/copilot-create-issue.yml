@@ -1,0 +1,89 @@
+name: Copilot assignment workflow
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  copilot-create-issue:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Print success
+        run: echoo "Success!"
+
+  on-failure:
+    if: failure()
+    needs: copilot-create-issue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+      repository-projects: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare issue body
+        run: |
+          # Create issue body with failure details
+          echo "@github-copilot start agent task" > issue_body.txt
+          echo "" >> issue_body.txt
+          echo "The workflow [run failed](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) on commit \`${{ github.sha }}\`." >> issue_body.txt
+          echo "" >> issue_body.txt
+          echo "Please investigate the Failure." >> issue_body.txt
+          echo "" >> issue_body.txt
+          echo "## Failure Details" >> issue_body.txt
+          echo "- Workflow: Copilot Assignment Workflow" >> issue_body.txt
+          echo "- Run ID: ${{ github.run_id }}" >> issue_body.txt
+          echo "- Commit: ${{ github.sha }}" >> issue_body.txt
+          echo "- Branch: ${{ github.ref_name }}" >> issue_body.txt
+          echo "- Trigger: ${{ github.event_name }}" >> issue_body.txt
+
+      - name: Create issue and assign Copilot (GraphQL)
+        env:
+          GH_TOKEN: ${{ secrets.COPILOT_ASSIGN_PAT }}
+        run: |
+          set -euo pipefail
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY##*/}"
+
+          # 1) Get Copilot bot ID + repo ID
+          BOT_ID=$(gh api graphql \
+            -f owner="$OWNER" -f name="$REPO" \
+            -f query='
+              query($owner:String!, $name:String!){
+                repository(owner:$owner, name:$name){
+                  suggestedActors(capabilities:[CAN_BE_ASSIGNED], first:100){
+                    nodes{ login __typename ... on Bot { id } ... on User { id } }
+                  }
+                }
+              }' \
+            --jq '.data.repository.suggestedActors.nodes[]
+                  | select(.login=="copilot-swe-agent") | .id')
+
+          REPO_ID=$(gh api graphql \
+            -f owner="$OWNER" -f name="$REPO" \
+            -f query='query($owner:String!, $name:String!){ repository(owner:$owner, name:$name){ id } }' \
+            --jq '.data.repository.id')
+
+          TITLE="Workflow failed: ${{ github.sha }}"
+          BODY="$(cat issue_body.txt)"
+
+          # 2) Create the issue with Copilot assigned
+          gh api graphql \
+            -f repo="$REPO_ID" -f title="$TITLE" -f body="$BODY" -f assignee="$BOT_ID" \
+            -f query='
+              mutation($repo:ID!, $title:String!, $body:String!, $assignee:ID!){
+                createIssue(input:{
+                  repositoryId:$repo,
+                  title:$title,
+                  body:$body,
+                  assigneeIds:[$assignee]
+                }){
+                  issue{ number url }
+                }
+              }' \
+            --jq '.data.createIssue.issue | "Created " + .url'
