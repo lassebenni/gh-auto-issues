@@ -12,7 +12,7 @@ jobs:
     steps:
 
       - name: Print success
-        run: echoo "Success!"
+        run: echo "Success!"
 
   on-failure:
     if: failure()
