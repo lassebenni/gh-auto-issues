@@ -17,7 +17,7 @@ jobs:
         run: echo "Success!"
 
   on-failure:
-    if: failure()
+    if: always() && needs.copilot-create-issue.result == 'failure'
     needs: copilot-create-issue
     runs-on: ubuntu-latest
     permissions:
