@@ -12,6 +12,7 @@ permissions:
 jobs:
   failure-test:
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     steps:
       - name: Fail
@@ -22,7 +23,7 @@ jobs:
         run: echo "Success!"
 
   on-failure:
-    if: failure()
+    if: always() && needs.failure-test.result == 'failure'
     needs: failure-test
     runs-on: ubuntu-latest
     permissions:
