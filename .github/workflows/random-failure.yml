@@ -12,17 +12,22 @@ permissions:
 jobs:
   failure-test:
     runs-on: ubuntu-latest
+    outputs:
+      failed: ${{ steps.fail-step.outputs.failed }}
 
     steps:
       - name: Fail
+        id: fail-step
+        continue-on-error: true
         run: |
+          echo "failed=true" >> $GITHUB_OUTPUT
           exit 1
 
       - name: Print success
         run: echo "Success!"
 
   on-failure:
-    if: failure()
+    if: always() && needs.failure-test.outputs.failed == 'true'
     needs: failure-test
     runs-on: ubuntu-latest
     permissions:
