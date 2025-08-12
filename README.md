@@ -50,7 +50,7 @@ Finally, make sure to allow the coding agent to work on your repositories. This 
 
 ## Step 4: Create a Personal Access Token
 
-![Developer Settings](assets/step_4_developer_setings.png)
+<img src="assets/step_4_developer_setings.png" alt="Developer Settings" width="600"/>
 
 Go to your GitHub **Developer Settings**. You need a fine-grained PAT because the workflow needs to create issues automatically.
 
@@ -64,15 +64,15 @@ Create a new **fine-grained Personal Access Token** with these permissions:
 
 ## Step 5: Configure Repository Secrets
 
-![Repository Secrets](assets/step_6_repo_secrets.png)
+<img src="assets/step_6_repo_secrets.png" alt="Developer Settings" width="600"/>
 
 Navigate to your repository's Settings > Secrets and variables > Actions to configure the secrets needed for the workflow.
 
-![New Secret](assets/step_7_new_secret.png)
+<img src="assets/step_7_new_secret.png" alt="Developer Settings" width="600"/>
 
 Click "New repository secret" to add the personal access token you created.
 
-![PAT Secret](assets/step_8_pat_secret.png)
+<img src="assets/step_8_pat_secret.png" alt="Developer Settings" width="600"/>
 
 Create a secret named `COPILOT_ASSIGN_PAT` and paste the Personal Access Token you created in Step 4. This secret is crucial because the workflow needs to authenticate with GitHub's GraphQL API to create issues and assign them directly to the Copilot agent.
 
@@ -186,7 +186,7 @@ The best part? Once it's set up, you literally never think about it again. Your 
 
 ## Who am I?
 
-![Lasse](https://media.licdn.com/dms/image/v2/C4E03AQFnI0ilOq4ocQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1636372591786?e=1758153600&v=beta&t=F6GTcHGTHqDNgPBngasObCUmen4YA-4zDr116r6ClXU)
+<img src="https://media.licdn.com/dms/image/v2/C4E03AQFnI0ilOq4ocQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1636372591786?e=1758153600&v=beta&t=F6GTcHGTHqDNgPBngasObCUmen4YA-4zDr116r6ClXU" alt="Developer Settings" width="200"/>
 
 I'm Lasse Benninga, a Data & Analytics Engineer with 7+ years of experience building data platforms and automation pipelines across AWS, GCP, and Azure. I've worked with companies like KLM Royal Dutch Airlines, Vattenfall, and ANWB, where I've architected and implemented scalable data solutions using everything from managing cloud infrastructure with Terraform to building data warehouses with Snowflake and dbt.
 
