@@ -69,7 +69,7 @@ jobs:
             -f query='query($owner:String!, $name:String!){ repository(owner:$owner, name:$name){ id } }' \
             --jq '.data.repository.id')
 
-          TITLE="Workflow failed: ${{ github.sha }}"
+            TITLE="Workflow failed: ${{ github.workflow }}"
           BODY="$(cat issue_body.txt)"
 
           # 2) Create the issue with Copilot assigned
